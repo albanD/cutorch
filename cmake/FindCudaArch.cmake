@@ -3,7 +3,7 @@
 
 # Known NVIDIA GPU achitectures Torch can be compiled for.
 # This list will be used for CUDA_ARCH_NAME = All option
-SET(KNOWN_GPU_ARCHITECTURES "2.0 2.1(2.0) 3.0 3.5 5.0 5.2")
+SET(KNOWN_GPU_ARCHITECTURES "2.0 2.1(2.0) 3.0 3.5 5.0 5.2 5.3")
 
 ################################################################################################
 # Removes duplicates from LIST(s)
@@ -114,6 +114,19 @@ FUNCTION(SELECT_NVCC_ARCH_FLAGS out_variable)
   else()  # (${CUDA_ARCH_NAME} STREQUAL "Manual")
     SET(__cuda_arch_bin ${CUDA_ARCH_BIN})
   ENDIF()
+
+  # Verify that all architectures are valid
+  FOREACH(__arch ${__cuda_arch_bin})
+    # Prevent the "." in the arch to match with everything
+    STRING(REGEX REPLACE "\\." "\\\\." __arch_escaped "${__arch}")
+    IF(NOT KNOWN_GPU_ARCHITECTURES MATCHES "${__arch_escaped}")
+      IF(${CUDA_ARCH_NAME} STREQUAL "Auto")
+        MESSAGE(FATAL_ERROR "The detected CUDA architecture ${__arch} is not supported. If you are not going to use this device, you can hide it with CUDA_VISIBLE_DEVICES.")
+      ELSE()
+        MESSAGE(FATAL_ERROR "The requested CUDA architecture ${__arch} is not supported.")
+      ENDIF()
+    ENDIF()
+  ENDFOREACH()
 
   MESSAGE(STATUS "Compiling for CUDA architecture: ${__cuda_arch_bin}")
 
