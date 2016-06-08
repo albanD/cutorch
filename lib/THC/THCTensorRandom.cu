@@ -508,6 +508,25 @@ sampleMultinomialOnce(float* dest,
         (cat < categories) && (sample <= curBucket) && (sample > prevBucket);
 
       if (inBucket) {
+        if(dist[curDist*categories + cat] == 0) {
+          printf("tidx.x: %d\n", threadIdx.x);
+          printf("Probabilities (float then hex)\n", threadIdx.x);
+          printf("%f - %f\n",
+            dist[curDist*categories + cat - 1],
+            dist[curDist*categories + cat]);
+          printf("%#08x - %#08x\n",
+            *(int*)&dist[curDist*categories + cat - 1],
+            *(int*)&dist[curDist*categories + cat]);
+          printf("Prefix sum (float then hex)\n", threadIdx.x);
+          printf("%f - %f\n",
+            prevBucket,
+            curBucket);
+          printf("%#08x - %#08x\n",
+            *(int*)&prevBucket,
+            *(int*)&curBucket);
+          printf("BAD!\n");
+        }
+
         // We're done; we have the sample
         // Torch indices are 1-based
         // FIXME: broadcast exit flag?
